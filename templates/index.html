@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISAIAH GENIUSHERO DATA HUB</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #111; text-align: center; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #333; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        button { background-color: #007bff; color: white; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>ISAIAH GENIUSHERO DATA HUB</h2>
+    <form id="paymentForm">
+        <label for="network">Select Network:</label>
+        <select id="network" name="network" required>
+            <option value="MTN">MTN</option>
+            <option value="Telecel">Telecel</option>
+            <option value="AT">AT (AirtelTigo)</option>
+        </select>
+
+        <label for="phone">Recipient Phone Number:</label>
+        <input type="tel" id="phone" name="phone" placeholder="0241234567" required>
+
+        <label for="bundle">Select Data Package:</label>
+        <select id="bundle" name="bundle" onchange="updatePrice()" required>
+            <option value="1" data-price="5.00">1 GB - GHS 5.00</option>
+            <option value="2" data-price="10.00">2 GB - GHS 10.00</option>
+            <option value="3" data-price="15.00">3 GB - GHS 15.00</option>
+            <option value="4" data-price="20.00">4 GB - GHS 20.00</option>
+            <option value="5" data-price="25.00">5 GB - GHS 25.00</option>
+            <option value="6" data-price="30.00">6 GB - GHS 30.00</option>
+            <option value="8" data-price="40.00">8 GB - GHS 40.00</option>
+            <option value="10" data-price="50.00">10 GB - GHS 50.00</option>
+            <option value="12" data-price="60.00">12 GB - GHS 60.00</option>
+            <option value="15" data-price="75.00">15 GB - GHS 75.00</option>
+            <option value="20" data-price="100.00">20 GB - GHS 100.00</option>
+            <option value="25" data-price="125.00">25 GB - GHS 125.00</option>
+            <option value="30" data-price="150.00">30 GB - GHS 150.00</option>
+            <option value="40" data-price="200.00">40 GB - GHS 200.00</option>
+            <option value="50" data-price="250.00">50 GB - GHS 250.00</option>
+            <option value="100" data-price="500.00">100 GB - GHS 500.00</option>
+            <option value="200" data-price="1000.00">200 GB - GHS 1000.00</option>
+        </select>
+
+        <label for="amount">Price (GHS):</label>
+        <input type="number" id="amount" name="amount" value="5.00" readonly required>
+
+        <button type="submit" id="payBtn">Pay & Receive Data</button>
+    </form>
+</div>
+
+<script>
+    function updatePrice() {
+        const bundleSelect = document.getElementById('bundle');
+        const selectedOption = bundleSelect.options[bundleSelect.selectedIndex];
+        const price = selectedOption.getAttribute('data-price');
+        document.getElementById('amount').value = price;
+    }
+
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const network = document.getElementById('network').value;
+        const phone = document.getElementById('phone').value;
+        const bundle = document.getElementById('bundle').value;
+        const amount = document.getElementById('amount').value;
+
+        fetch('/initiate-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                network: network,
+                phone: phone,
+                bundle_gb: bundle,
+                amount: amount
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status && data.data.authorization_url) {
+                window.location.href = data.data.authorization_url;
+            } else {
+                alert('Initialization failed: ' + (data.message || 'Error starting payment.'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Server error. Please try again.');
+        });
+    });
+</script>
+
+</body>
+</html>
